@@ -1,9 +1,21 @@
 import RPi.GPIO as GPIO
 import time
+import paho.mqtt.client as mqtt
+
 
 red = 17
 green = 27
 blue = 22
+
+COLOR_PIN = green
+
+
+
+def on_connect(self,client, userdata, rc):
+    #print("Connected with result code "+str(rc))
+    self.subscribe("sensor/lightstate")
+    self.subscribe("sensor/lightcolor")
+
 
 #set up pins as OUTPUT
 def setupPin(pin):
@@ -39,27 +51,43 @@ def turnOffAll():
     turnOff(red)
     turnOff(blue)
 
+def on_message(client,userdata,message):
+    topic = message.topic
+    print("callback message {}".format(topic))
+    payload = str(message.payload.decode("utf-8"))
+    if(topic == 'sensor/lightstate'):
+        if(payload == 'on'):
+           redOn()
+           print("on")
+        elif(payload == 'off'):
+            turnOffAll()
+    elif(topic == 'sensor/lightcolor'):
+        turnOffAll()
+        if(payload == 'red'):
+            redOn()
+        elif(payload == 'green'):
+            greenOn()
+        elif(payload =='magenta'):
+            magentaOn()
+        elif(payload == 'blue'):
+            blueOn()
+    else:
+        print("command does not exist")
 
 
-for i in range(0,10):
 
-    redOn()
-    time.sleep(2)
-    turnOffAll()
-    time.sleep(2)
-    blueOn()
-    time.sleep(2)
-    turnOffAll()
-    time.sleep(2)
-    greenOn()
-    time.sleep(2)
-    turnOffAll()
-    time.sleep(2)
-    magentaOn()
-    time.sleep(2)
-    turnOffAll()
-    time.sleep(2)
-turnOffAll()
 
-    
+
+
+
+
+
+#connect to the broker 
+client = mqtt.Client()
+client.on_connect = on_connect
+client.on_message = on_message
+client.connect("localhost",1883,60)
+client.loop_forever()
+
+
 
