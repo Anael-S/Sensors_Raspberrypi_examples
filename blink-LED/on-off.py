@@ -53,6 +53,7 @@ def turnOffAll():
 
 def on_message(client,userdata,message):
     topic = message.topic
+    turnOffAll()
     print("callback message {}".format(topic))
     payload = str(message.payload.decode("utf-8"))
     if(topic == 'sensor/lightstate'):
@@ -71,6 +72,7 @@ def on_message(client,userdata,message):
             magentaOn()
         elif(payload == 'blue'):
             blueOn()
+        else: redOn()    
     else:
         print("command does not exist")
 
@@ -81,13 +83,18 @@ def on_message(client,userdata,message):
 
 
 
+if __name__=="__main__":
+    try:
 
-#connect to the broker 
-client = mqtt.Client()
-client.on_connect = on_connect
-client.on_message = on_message
-client.connect("localhost",1883,60)
-client.loop_forever()
+        #connect to the broker 
+        client = mqtt.Client()
+        client.on_connect = on_connect
+        client.on_message = on_message
+        client.connect("localhost",1883,60)
+        client.loop_forever()
+
+    except KeyboardInterrupt:
+        turnOffAll()
 
 
 
