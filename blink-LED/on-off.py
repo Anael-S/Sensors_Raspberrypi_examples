@@ -7,7 +7,7 @@ red = 17
 green = 27
 blue = 22
 
-COLOR_PIN = green
+COLOR_PIN = blue
 
 
 
