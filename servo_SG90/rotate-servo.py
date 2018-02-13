@@ -1,35 +1,47 @@
 import time
-import RPi.GPIO as GPIO
 import paho.mqtt.client as mqtt
+import RPi.GPIO as GPIO
+
+
+pin_signal = 18
 
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(18,GPIO.OUT)
-pwm = GPIO.PWM(18,50)
-pwm.start(7.5)
+GPIO.setup(pin_signal,GPIO.OUT)
+
+pwm=GPIO.PWM(pin_signal,50)
+
+pwm.start(5)
+
+
 def on_connect(self, client,data,rc):
     self.subscribe("sensor/servo")
 
 def on_message(client,data, msg):
     topic = msg.topic
     payload = str(msg.payload.decode("utf-8" ))
-
     if(topic == 'sensor/servo'):
         if(payload == 'right'):
+           
             print(" 2.5")
-            pwm.ChangeDutyCycle(2.5) #turn -90i
+            client.publish('sensor/servo','rightdone')
+            pwm.ChangeDutyCycle(2.5)
             time.sleep(1)
+            return
         elif(payload =='neutral'):
             print("7.5")
+            client.publish('sensor/servo','neutraldone')
             pwm.ChangeDutyCycle(7.5)
             time.sleep(1)
-        
+            return
         elif(payload == 'left'):
             print("12.5")
             pwm.ChangeDutyCycle(12.5)
+            client.publish('sensor/servo','leftdone')
             time.sleep(1)
+            return
         else:
-            print("invalid message")
-        
+            print(payload)
+            return
 
 try:
     client = mqtt.Client()  

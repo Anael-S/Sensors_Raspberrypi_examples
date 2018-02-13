@@ -8,16 +8,14 @@ client = mqtt.Client()
 client.connect("localhost",1883,60)
 # Example using a Beaglebone Black with DHT sensor
 # connected to pin P8_11.
-trig= 24
-echo = 21
+trig= 12
+echo = 16
 
 GPIO.setmode(GPIO.BCM)
 
 GPIO.setup(trig,GPIO.OUT)
 GPIO.setup(echo,GPIO.IN)
 
-#GPIO.output(trig,False)
-#sleep(2)
 GPIO.output(trig,True)
 sleep(0.00001)
 GPIO.output(trig,False)
@@ -45,6 +43,6 @@ try:
 
         print(distance)
         client.publish('sensor/ultrasonic',distance)
-
+        sleep(1)
 except KeyboardInterrupt:
     pass

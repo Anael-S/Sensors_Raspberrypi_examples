@@ -7,7 +7,6 @@ red = 17
 green = 27
 blue = 22
 
-COLOR_PIN = blue
 
 
 
@@ -15,20 +14,15 @@ def on_connect(self,client, userdata, rc):
     #print("Connected with result code "+str(rc))
     self.subscribe("sensor/lightstate")
     self.subscribe("sensor/lightcolor")
-
-
-#set up pins as OUTPUT
-def setupPin(pin):
     GPIO.setmode(GPIO.BCM)
-    GPIO.setup(pin,GPIO.OUT)
-   
+    GPIO.setup(red,GPIO.OUT)
+    GPIO.setup(green,GPIO.OUT)
+    GPIO.setup(blue,GPIO.OUT) 
    
 def turnOn(pin): 
-    setupPin(pin)
     GPIO.output(pin, GPIO.HIGH)
 
 def turnOff(pin):
-    setupPin(pin)
     GPIO.output(pin,GPIO.LOW)
 
 
@@ -53,28 +47,44 @@ def turnOffAll():
 
 def on_message(client,userdata,message):
     topic = message.topic
-    turnOffAll()
     print("callback message {}".format(topic))
     payload = str(message.payload.decode("utf-8"))
+   
     if(topic == 'sensor/lightstate'):
         if(payload == 'on'):
-           redOn()
-           print("on")
+
+            greenOn()
+            client.publish('sensor/lightstate',"ondone")
+            client.publish('sensor/lightcolor',"greendone")
+            return
         elif(payload == 'off'):
             turnOffAll()
+            client.publish('sensor/lightstate','offdone')
+            return
     elif(topic == 'sensor/lightcolor'):
-        turnOffAll()
         if(payload == 'red'):
+            turnOffAll()
             redOn()
-        elif(payload == 'green'):
-            greenOn()
-        elif(payload =='magenta'):
-            magentaOn()
+            client.publish("sensor/lightcolor",'reddone')
+            return
         elif(payload == 'blue'):
+            turnOffAll()
             blueOn()
-        else: redOn()    
+            client.publish("sensor/lightcolor",'bluedone')
+            return
+        elif(payload =='magenta'):
+            turnOffAll()
+            magentaOn()
+            client.publish("sensor/lightcolor",'magentadone')
+            return 
+        elif(payload == 'green'):
+            turnOffAll()
+            greenOn()
+            client.publish("sensor/lightcolor",'greendone')
+            return
+        else: print("INVALID:doesnot understand the payload message!i")    
     else:
-        print("command does not exist")
+        print("command doesnt exist")
 
 
 
